@@ -16,7 +16,7 @@ See the [batch](./batch) directory for the completed [Dockerfile](./batch/Docker
 `docker build -t serverless_imagenet_bottleneck`
 
 ### Register Docker Image to AWS ECR
-1. Navigate to the [ECS Console](https://console.aws.amazon.com/ecs)=
+1. Navigate to the [ECS Console](https://console.aws.amazon.com/ecs)
 2. Click "Repositories" on the left.
 3. Click "Create Repositories".
 4. Follow the directions.
