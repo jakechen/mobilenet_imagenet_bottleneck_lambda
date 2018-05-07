@@ -29,7 +29,7 @@ def record_bottleneck(s3_bucket, s3_key, pretrained_model):
     features = model.predict(x)
     
     # save features to /tmp/[s3_key].npy
-    np.save(open(feat_path, 'w'), features)
+    np.save(open(feat_path, 'wb'), features)
     
     # upload features to s3://[s3_bucket]/[s3_key].npy
     s3.upload_file(Filename=feat_path,
