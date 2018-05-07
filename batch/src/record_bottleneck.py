@@ -4,7 +4,7 @@ import boto3
 import argparse
 
 
-def record_bottleneck(s3_bucket, s3_key, pretrained_model='MobileNet'):
+def record_bottleneck(s3_bucket, s3_key, pretrained_model):
     # load selected pre-trained model
     if pretrained_model=='MobileNet':
         from keras.applications.mobilenet import MobileNet, preprocess_input
@@ -47,8 +47,8 @@ if __name__=='__main__':
                         help='Amazon S3 bucket where the image is stored.')
     parser.add_argument('s3_key',
                         help='Amazon S3 Key for the the image.')
-    parser.add_argument('model', 
-        help='Pretrained Keras Application to use. Defaults to "MobileNet".',
+    parser.add_argument('--model', 
+        help='Keras Application to use. Defaults to "MobileNet".',
         default='MobileNet'
     )
     
