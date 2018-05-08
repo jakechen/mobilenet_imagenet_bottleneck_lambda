@@ -1,17 +1,23 @@
 import boto3
+import logging
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
 
 batch = boto3.client('batch')
 
 def lambda_handler(event, context):
+    logger.debug(event)
     
     for record in event['Records']:
         s3_bucket = record['s3']['bucket']['name']
         s3_key = record['s3']['object']['key']
+        logger.debug(s3_bucket)
+        logger.debug(s3_key)
         
         response = batch.submit_job(
-            jobName='serverless-imagenet-bottleneck-{}'.format(s3_key),
+            jobName='serverless-imagenet-bottleneck',
             jobQueue='first-run-job-queue',
-            jobDefinition='serverless_imagenet_bottleneck:3 ',
+            jobDefinition='serverless-imagenet-bottleneck:1',
             containerOverrides={
                 'command': [
                     'python3',
@@ -19,12 +25,6 @@ def lambda_handler(event, context):
                     s3_bucket,
                     s3_key
                 ]
-            },
-            retryStrategy={
-                'attempts': 123
-            },
-            timeout={
-                'attemptDurationSeconds': 123
             }
         )
         
