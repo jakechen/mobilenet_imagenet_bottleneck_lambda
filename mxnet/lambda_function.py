@@ -26,7 +26,7 @@ def lambda_handler(event, context):
         feat_path = '/tmp/{}.npy'.format(s3_key) # where to save features
         
         # load selected MobileNet model
-        model = vision.get_model(name='mobilenet1.0', pretrained=True)
+        model = vision.get_model(name='mobilenet1.0', pretrained=True, root='/tmp/.mxnet/models')
         
         # download file to /tmp/[s3_key]
         s3.download_file(Bucket=s3_bucket,
