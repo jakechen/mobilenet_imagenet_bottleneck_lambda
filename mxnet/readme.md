@@ -15,4 +15,8 @@ Instructions:
 
 	# Zip up deployment package
 	zip -r -9 ../lambda.zip ./* -x "*.pyc" "env/*" "notebooks/*" "boto*" "wheel*" "setup*" "pip*" 
+	
+	# Uplaod deployment package
+	aws s3 cp ../lambda.zip s3://jakechenawstemp/
+	
 ```
