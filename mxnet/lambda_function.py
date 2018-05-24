@@ -2,6 +2,7 @@ import boto3
 import numpy as np
 import mxnet as mx
 from mxnet.gluon.model_zoo import vision
+from io import BytesIO
 import logging
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
