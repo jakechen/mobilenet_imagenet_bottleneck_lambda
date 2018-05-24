@@ -1,10 +1,10 @@
-import numpy as np
-from keras.preprocessing import image
 import boto3
+import numpy as np
+import mxnet as mx
+from mxnet.gluon.model_zoo import vision
 import logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
 
 s3 = boto3.client('s3')
 batch = boto3.client('batch')
@@ -22,12 +22,11 @@ def lambda_handler(event, context):
         logger.debug(s3_bucket)
         logger.debug(s3_key)
         
-        # load selected MobileNet model
-        from keras.applications.mobilenet import MobileNet, preprocess_input
-        model = MobileNet(input_shape=(224,224,3), include_top=False, weights='imagenet')
-        
         img_path = '/tmp/{}'.format(s3_key) # where to download image
         feat_path = '/tmp/{}.npy'.format(s3_key) # where to save features
+        
+        # load selected MobileNet model
+        model = vision.get_model(name='mobilenet1.0', pretrained=True)
         
         # download file to /tmp/[s3_key]
         s3.download_file(Bucket=s3_bucket,
@@ -35,13 +34,17 @@ def lambda_handler(event, context):
                          Filename=img_path)
         
         # load and preprocess image
-        img = image.load_img(img_path, target_size=(224,224))
-        x = image.img_to_array(img)
-        x = np.expand_dims(x, axis=0)
-        x = preprocess_input(x)
+        with open("./dog.0.jpg", 'rb') as fp:
+            str_image = fp.read()
+        image = mx.image.imdecode(str_image)
+        image = image.astype('float32')/255
+        image = mx.image.color_normalize(image,
+                                         mean=mx.nd.array([0.485, 0.456, 0.406]),
+                                         std=mx.nd.array([0.229, 0.224, 0.225]))
+        image = image.reshape([1, -1, image.shape[0], image.shape[1]])
         
         # get bottleneck features
-        features = model.predict(x)
+        features = model.features(image)
         
         # save features to /tmp/[s3_key].npy
         np.save(open(feat_path, 'wb'), features)
