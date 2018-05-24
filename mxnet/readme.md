@@ -1,7 +1,7 @@
 Spin up EC2 instance with Public Amazon Linux AMI, defined [here](https://docs.aws.amazon.com/lambda/latest/dg/current-supported-versions.html)
 
 Instructions:
-```python
+```Shell
 	virtualenv -p python27 env
 
 	# Install OS and Python libraries/packages
