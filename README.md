@@ -1,41 +1,22 @@
 # Serverless Imagenet Bottleneck Workflow
 
-This AWS Serverless workflow returns the bottleneck features for a network pretrained on ImageNet. One of the primary use cases of this workflow is transfer learning for image classification, where pretrained networks are used as a foundation for custom labels, thus drastically speeding up training time. One further optimization is to first run the image through the pretrained network, record the n-1 layer (aka bottleneck features), and store the outputs to an offline file, or in this case, Amazon S3. For more information on using bottleneck features to speed up transfer learning, see the 2nd half of [this blog](https://blog.keras.io/building-powerful-image-classification-models-using-very-little-data.html)
+## Introduction
+This set of tutorials create AWS Serverless workflows that return the bottleneck features for a network pretrained on ImageNet. There are multiple workflows depending on the Deep Learning framework used, which determines which AWS service used for inference. For example, MXNet is small enough to be deployed onto AWS Lambda, but Keras+Tensorflow will require Batch in addition to Lambda.
+
+## Background
+One of the primary use cases of this workflow is Transfer Learning for image classification. In Transfer Learning, pre-trained networks are used as a foundation for custom labels. In practice, model training only happens on the last layer, thus drastically speeding up training time. One further optimization is to first run the image through the pretrained network, record the n-1 layer (aka bottleneck features), and store the outputs to an offline file. In this case, we will store the features into Amazon S3. For more information on using bottleneck features to speed up transfer learning, see the 2nd half of [this blog](https://blog.keras.io/building-powerful-image-classification-models-using-very-little-data.html)
 
 The primary benefits of using a Serverless workflow is the ability to offload the compute resource management to an underlying fleet. This means no need to manage EC2 instances; we only pay when the workflow is run.
 
 ## TODO
 - GPU inference instead of CPU
 
-## Instructions
-### Build Docker Image
-First, we build a Docker Image that returns the bottleneck features for an input image.
+## Methods Shown
+### 1. [Baseline MXNet on Sagemaker](./mxnet-sagemaker-endpoint/)
+In this initial method, we will use a Sagemaker endpoint to run the inference and output the bottleneck features. While this does not have the benefits of Serverless, we can explore this method to establish a performance baseline.
 
-See the [batch](./batch) directory for the completed [Dockerfile](./batch/Dockerfile) and the completed [python script](./batch/src/record_bottleneck.py).
+### 2. [MXNet on Lambda](./mxnet-lambda)
+This re-uses most of the code from the baseline, but will use Lambda for the Serverless compute.
 
-`docker build -t serverless_imagenet_bottleneck`
-
-### Register Docker Image to AWS ECR
-1. Navigate to the [ECS Console](https://console.aws.amazon.com/ecs)
-2. Click "Repositories" on the left.
-3. Click "Create Repositories".
-4. Follow the directions.
-
-### Create AWS Batch Job Definition
-1. Navigate to the [AWS Batch Console](https://console.aws.amazon.com/batch/)
-1. Create GPU-Compute Environment
-	1. Select p2 family
-	2. Use custom AMI created above
-	3. Use all other defaults
-2. Create Job Queue
-	1. Set 1 as priority
-	2. Select compute env from above
-3. Create Job Definition
-	1. In "Container Image", input the ECS Repository URI from above
-	2. Leave everything else as default
-4. Submit a job
-	1. Use the Job Definition from above
-	2. Use the Job Queue from above
-	3. Submit!
-
-### Create AWS Lambda Function
+### 3. [Keras+Tensorflow on Lambda+Batch](./keras-tf-lambda-batch)
+Finally, we explore using Keras Applications for feature generation. However, this method is too large for AWS Lambda alone so it requires both AWS Lambda and AWS Batch.
